@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { FiSearch, FiFilter, FiChevronDown, FiArrowDown, FiCopy, FiUser, FiSlash, FiPlus, FiTrash2, FiEye } from "react-icons/fi";
-import { adminService, DashboardStats, Post } from '../api/services/adminService';
+import { FiSearch, FiChevronDown, FiArrowDown, FiCopy, FiPlus, FiTrash2} from "react-icons/fi";
+import { adminService, DashboardStats} from '../api/services/adminService';
 import Navigation from '../components/overview/navigation';
 import { CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Tabs, Tab, TextField } from '@mui/material';
 
@@ -21,13 +21,13 @@ interface Approver {
   performance: ApproverPerformance;
 }
 
-interface ApproverResponse {
-  status: string;
-  data: {
-    approvers: Approver[];
-    total: number;
-  };
-}
+// interface ApproverResponse {
+//   status: string;
+//   data: {
+//     approvers: Approver[];
+//     total: number;
+//   };
+// }
 
 interface ApproverPost {
   id: string;

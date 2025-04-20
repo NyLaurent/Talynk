@@ -1,5 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { IoChevronDown, IoChevronForward, IoExitOutline, IoPerson, IoSearch, IoNotifications, IoPersonCircle, IoCheckmarkCircle } from "react-icons/io5";
+import {
+  IoChevronDown,
+  IoChevronForward,
+  IoExitOutline,
+  IoPerson,
+  IoSearch,
+  IoNotifications,
+  IoPersonCircle,
+  IoCheckmarkCircle,
+} from "react-icons/io5";
 import { adminService, Post } from "../../api/services/adminService";
 import { CircularProgress } from "@mui/material";
 
@@ -22,29 +31,17 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onSearchResults, onSelectPost }) => {
-  const [selectedOption, setSelectedOption] = useState("Find Post By Traceability ID");
-  const [isOpen, setIsOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(
+    "Find Post By Traceability ID"
+  );
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [foundPostOwner, setFoundPostOwner] = useState<ExtendedUser | null>(null);
+  const [foundPostOwner, setFoundPostOwner] = useState<ExtendedUser | null>(
+    null
+  );
   const [searchResults, setSearchResults] = useState<Post[]>([]);
   const [searchSuccess, setSearchSuccess] = useState<boolean>(false);
-
-  // Dropdown options
-  const options = [
-    "Find Post By Traceability ID",
-    "Find Post By Author",
-    "Find Post By Date",
-    "Find Post By Status",
-  ];
-
-  // Handle option selection
-  const handleSelect = (option: string) => {
-    setSelectedOption(option);
-    setIsOpen(false);
-    setSearchError(null);
-  };
 
   // Clear search success message after delay
   useEffect(() => {
@@ -56,56 +53,59 @@ const Sidebar: React.FC<SidebarProps> = ({ onSearchResults, onSelectPost }) => {
     }
   }, [searchSuccess]);
 
-  const handleSearch = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!searchQuery.trim()) {
-      setSearchError("Please enter a search term");
-      return;
-    }
-    
-    setIsSearching(true);
-    setSearchError(null);
-    setFoundPostOwner(null);
-    setSearchResults([]);
-    
-    try {
-      console.log("Searching for:", searchQuery.trim());
-      const posts = await adminService.searchPosts(searchQuery.trim());
-      
-      if (posts && posts.length > 0) {
-        // Set search results 
-        setSearchResults(posts);
-        
-        // Pass results to parent component if callback exists
-        if (onSearchResults) {
-          onSearchResults(posts);
-        }
-        
-        // If we have onSelectPost, pass the first post to it
-        if (onSelectPost) {
-          onSelectPost(posts[0]);
-        }
-        
-        // If post has a user_id, fetch the user details
-        if (posts[0].user_id) {
-          const userInfo = await adminService.getUserById(posts[0].user_id);
-          setFoundPostOwner(userInfo as unknown as ExtendedUser);
-        } else {
-          setFoundPostOwner(null);
-        }
-        
-        setSearchSuccess(true);
-      } else {
-        setSearchError("No posts found with that ID");
+  const handleSearch = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (!searchQuery.trim()) {
+        setSearchError("Please enter a search term");
+        return;
       }
-    } catch (error) {
-      console.error("Search error:", error);
-      setSearchError("Error searching for posts. Please try again.");
-    } finally {
-      setIsSearching(false);
-    }
-  }, [searchQuery, onSearchResults, onSelectPost]);
+
+      setIsSearching(true);
+      setSearchError(null);
+      setFoundPostOwner(null);
+      setSearchResults([]);
+
+      try {
+        console.log("Searching for:", searchQuery.trim());
+        const posts = await adminService.searchPosts(searchQuery.trim());
+
+        if (posts && posts.length > 0) {
+          // Set search results
+          setSearchResults(posts);
+
+          // Pass results to parent component if callback exists
+          if (onSearchResults) {
+            onSearchResults(posts);
+          }
+
+          // If we have onSelectPost, pass the first post to it
+          if (onSelectPost) {
+            onSelectPost(posts[0]);
+          }
+
+          // If post has a user_id, fetch the user details
+          if (posts[0].user_id) {
+            const userInfo = await adminService.getUserById(posts[0].user_id);
+            setFoundPostOwner(userInfo as unknown as ExtendedUser);
+          } else {
+            setFoundPostOwner(null);
+          }
+
+          setSearchSuccess(true);
+        } else {
+          setSearchError("No posts found with that ID");
+        }
+      } catch (error) {
+        console.error("Search error:", error);
+        setSearchError("Error searching for posts. Please try again.");
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [searchQuery, onSearchResults, onSelectPost]
+  );
 
   // Handle key press for search (Enter key)
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -115,20 +115,19 @@ const Sidebar: React.FC<SidebarProps> = ({ onSearchResults, onSelectPost }) => {
   };
 
   // Handle account freeze/unfreeze
-  const handleAccountAction = async (action: 'freeze' | 'unfreeze') => {
+  const handleAccountAction = async (action: "freeze" | "unfreeze") => {
     if (!foundPostOwner || !foundPostOwner.id) return;
-    
+
     try {
       await adminService.manageAccount({
         userId: foundPostOwner.id,
-        action: action === 'freeze' ? 'freeze' : 'reactivate'
+        action: action === "freeze" ? "freeze" : "reactivate",
       });
-      
+
       // Refresh the search results to get updated user status
       if (foundPostOwner.posts_count) {
         await adminService.getUserById(foundPostOwner.id);
       }
-      
     } catch (err) {
       console.error(`Error ${action}ing account:`, err);
       setSearchError(`Failed to ${action} account. Please try again.`);
@@ -176,7 +175,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onSearchResults, onSelectPost }) => {
         {/* Search Feedback */}
         {searchSuccess && !searchError && (
           <div className="text-green-600 text-sm bg-green-50 p-2 rounded-md flex items-center">
-            <IoCheckmarkCircle className="mr-1" /> Found {searchResults.length} post(s)
+            <IoCheckmarkCircle className="mr-1" /> Found {searchResults.length}{" "}
+            post(s)
           </div>
         )}
 
@@ -190,7 +190,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onSearchResults, onSelectPost }) => {
         {/* Post Owner Info */}
         {foundPostOwner && (
           <div className="border border-gray-200 rounded-lg p-4 mt-2 bg-white shadow-sm">
-            <h3 className="font-semibold text-lg mb-3 text-gray-800">Post Owner</h3>
+            <h3 className="font-semibold text-lg mb-3 text-gray-800">
+              Post Owner
+            </h3>
             <div className="flex items-center mb-3">
               {foundPostOwner.profile_picture ? (
                 <img
@@ -202,12 +204,20 @@ const Sidebar: React.FC<SidebarProps> = ({ onSearchResults, onSelectPost }) => {
                 <IoPersonCircle className="w-12 h-12 text-gray-400 mr-3" />
               )}
               <div>
-                <p className="font-medium text-gray-800">{foundPostOwner.username || "Unknown User"}</p>
-                <p className="text-gray-500 text-sm">{foundPostOwner.email || "No email"}</p>
-                <span className={`inline-block mt-1 px-2 py-0.5 text-xs rounded-full ${
-                  foundPostOwner.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                  {foundPostOwner.status === 'active' ? 'Active' : 'Frozen'}
+                <p className="font-medium text-gray-800">
+                  {foundPostOwner.username || "Unknown User"}
+                </p>
+                <p className="text-gray-500 text-sm">
+                  {foundPostOwner.email || "No email"}
+                </p>
+                <span
+                  className={`inline-block mt-1 px-2 py-0.5 text-xs rounded-full ${
+                    foundPostOwner.status === "active"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {foundPostOwner.status === "active" ? "Active" : "Frozen"}
                 </span>
               </div>
             </div>
@@ -215,35 +225,49 @@ const Sidebar: React.FC<SidebarProps> = ({ onSearchResults, onSelectPost }) => {
               <div className="mt-3 grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-md">
                 <div className="text-sm">
                   <span className="text-gray-500">Total Posts:</span>
-                  <span className="ml-2 font-medium">{foundPostOwner.posts_count || 0}</span>
+                  <span className="ml-2 font-medium">
+                    {foundPostOwner.posts_count || 0}
+                  </span>
                 </div>
                 <div className="text-sm">
                   <span className="text-gray-500">Approved:</span>
-                  <span className="ml-2 font-medium text-green-600">{foundPostOwner.approved_posts_count || 0}</span>
+                  <span className="ml-2 font-medium text-green-600">
+                    {foundPostOwner.approved_posts_count || 0}
+                  </span>
                 </div>
                 <div className="text-sm">
                   <span className="text-gray-500">Pending:</span>
-                  <span className="ml-2 font-medium text-yellow-600">{foundPostOwner.pending_posts_count || 0}</span>
+                  <span className="ml-2 font-medium text-yellow-600">
+                    {foundPostOwner.pending_posts_count || 0}
+                  </span>
                 </div>
                 <div className="text-sm">
                   <span className="text-gray-500">Rejected:</span>
-                  <span className="ml-2 font-medium text-red-600">{foundPostOwner.rejected_posts_count || 0}</span>
+                  <span className="ml-2 font-medium text-red-600">
+                    {foundPostOwner.rejected_posts_count || 0}
+                  </span>
                 </div>
               </div>
             )}
-            
+
             {/* Account Actions */}
             {foundPostOwner.status && (
               <div className="mt-3">
                 <button
-                  onClick={() => handleAccountAction(foundPostOwner.status === 'active' ? 'freeze' : 'unfreeze')}
+                  onClick={() =>
+                    handleAccountAction(
+                      foundPostOwner.status === "active" ? "freeze" : "unfreeze"
+                    )
+                  }
                   className={`mt-2 w-full py-2 px-4 rounded-md text-white text-sm ${
-                    foundPostOwner.status === 'active' 
-                      ? 'bg-red-500 hover:bg-red-600' 
-                      : 'bg-green-500 hover:bg-green-600'
+                    foundPostOwner.status === "active"
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-green-500 hover:bg-green-600"
                   } transition-colors`}
                 >
-                  {foundPostOwner.status === 'active' ? 'Freeze Account' : 'Unfreeze Account'}
+                  {foundPostOwner.status === "active"
+                    ? "Freeze Account"
+                    : "Unfreeze Account"}
                 </button>
               </div>
             )}
@@ -266,38 +290,51 @@ const Sidebar: React.FC<SidebarProps> = ({ onSearchResults, onSelectPost }) => {
               </div>
               <div>
                 <div className="flex gap-1 items-center">
-                  <p className="text-sm font-semibold text-gray-800">John David</p>
-                  <span className="text-xs text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded-full">Just now</span>
+                  <p className="text-sm font-semibold text-gray-800">
+                    John David
+                  </p>
+                  <span className="text-xs text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded-full">
+                    Just now
+                  </span>
                 </div>
                 <p className="text-xs text-gray-600">
-                  A new post pending approval from {foundPostOwner?.username || "a user"}
+                  A new post pending approval from{" "}
+                  {foundPostOwner?.username || "a user"}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex gap-3 p-2 hover:bg-gray-100 rounded-md transition-colors">
               <div className="mt-1">
                 <IoPersonCircle className="h-8 w-8 text-gray-600 rounded-full" />
               </div>
               <div>
                 <div className="flex gap-1 items-center">
-                  <p className="text-sm font-semibold text-gray-800">Robert Miles</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    Robert Miles
+                  </p>
                   <span className="text-xs text-gray-500">1h ago</span>
                 </div>
-                <p className="text-xs text-gray-600">Created a new role Approver</p>
+                <p className="text-xs text-gray-600">
+                  Created a new role Approver
+                </p>
               </div>
             </div>
-            
+
             <div className="flex gap-3 p-2 hover:bg-gray-100 rounded-md transition-colors">
               <div className="mt-1">
                 <IoPersonCircle className="h-8 w-8 text-gray-600 rounded-full" />
               </div>
               <div>
                 <div className="flex gap-1 items-center">
-                  <p className="text-sm font-semibold text-gray-800">Robert Miles</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    Robert Miles
+                  </p>
                   <span className="text-xs text-gray-500">1h ago</span>
                 </div>
-                <p className="text-xs text-gray-600">Added new content for review</p>
+                <p className="text-xs text-gray-600">
+                  Added new content for review
+                </p>
               </div>
             </div>
           </div>

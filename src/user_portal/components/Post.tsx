@@ -30,7 +30,6 @@ interface PostProps {
 }
 
 const Post: React.FC<PostProps> = ({
-  id,
   title,
   caption,
   file_url,
@@ -40,7 +39,6 @@ const Post: React.FC<PostProps> = ({
   shares = 0,
   comments = 0,
   created_at,
-  status,
 }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -93,7 +91,7 @@ const Post: React.FC<PostProps> = ({
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
-            <button 
+            <button
               onClick={handleLike}
               className={`text-gray-400 hover:text-red-500 flex items-center space-x-1 ${
                 isLiked ? "text-red-500" : ""
@@ -111,7 +109,7 @@ const Post: React.FC<PostProps> = ({
               <span>{shares}</span>
             </button>
           </div>
-          <button 
+          <button
             onClick={handleSave}
             className={`text-gray-400 hover:text-yellow-500 ${
               isSaved ? "text-yellow-500" : ""

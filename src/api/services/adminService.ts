@@ -170,6 +170,7 @@ export const adminService = {
   getPendingPosts: async (): Promise<Post[]> => {
     try {
       const response = await apiClient.get<{ status: string; data: { posts: Post[] } }>('/api/admin/posts/pending');
+      
       // Check if response has a nested posts property
       if (response.data && response.data.status === 'success' && response.data.data && Array.isArray(response.data.data.posts)) {
         return response.data.data.posts;
@@ -179,7 +180,7 @@ export const adminService = {
         console.error("Unexpected response format for pending posts:", response.data);
         return [];
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching pending posts:", error);
       return [];
     }
@@ -212,14 +213,29 @@ export const adminService = {
 
   // Dashboard stats
   getDashboardStats: async (): Promise<DashboardStats> => {
-    const response = await apiClient.get<{ status: string; data: DashboardStats }>('/api/admin/dashboard/stats');
-    // Assuming the actual stats are nested under a 'data' property in the response
-    if (response.data && response.data.status === 'success') {
-      return response.data.data;
-    } else {
-      // Handle potential errors or unexpected response structure
-      console.error("Error fetching dashboard stats or invalid response structure:", response.data);
-      // Return a default/empty stats object or throw an error
+    try {
+      const response = await apiClient.get<{ status: string; data: DashboardStats }>('/api/admin/dashboard/stats');
+      
+      // Assuming the actual stats are nested under a 'data' property in the response
+      if (response.data && response.data.status === 'success') {
+        return response.data.data;
+      } else {
+        // Handle potential errors or unexpected response structure
+        console.error("Error fetching dashboard stats or invalid response structure:", response.data);
+        // Return a default/empty stats object or throw an error
+        return {
+          totalUsers: 0,
+          totalApprovers: 0,
+          pendingVideos: 0,
+          approvedVideos: 0,
+          rejectedVideos: 0,
+          frozenUsers: 0,
+          activeUsers: 0,
+        };
+      }
+    } catch (error: any) {
+      console.error("Error fetching dashboard stats:", error);
+      // Return default data
       return {
         totalUsers: 0,
         totalApprovers: 0,
@@ -263,11 +279,11 @@ export const adminService = {
           }
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user statistics:', error);
       // Return a default response instead of throwing to prevent UI errors
       return {
-        status: 'success',
+        status: 'error',
         data: {
           users: {
             total: 0,
@@ -298,7 +314,7 @@ export const adminService = {
         console.error("Unexpected response format for post search:", response.data);
         return [];
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error searching posts:', error);
       return [];
     }

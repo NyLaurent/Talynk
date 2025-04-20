@@ -28,11 +28,15 @@ const Landing = () => {
         });
 
         if (response.status === 'success') {
+      console.log("Role ---------->" + role);
           // Redirect based on role
           if (role === 'admin') {
             navigate('/admin/home');
+          } else if(role == 'approver') {
+            navigate('/approver/overview');
           } else {
-            navigate('/home');
+            navigate('/login');
+            console.log('Invalid role');
           }
         }
       } else {

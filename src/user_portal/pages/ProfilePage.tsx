@@ -1,11 +1,16 @@
 import type React from "react";
 import { useState } from "react";
-import { MoreHorizontal, Trash2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Trash2 } from "lucide-react";
 import { useUserPosts, useDeletePost } from "../../api/hooks/usePosts";
 
+interface Post {
+  id: string;
+  title: string;
+  file_url?: string;
+  status: "approved" | "pending" | "rejected";
+}
+
 const ProfilePage: React.FC = () => {
-  const navigate = useNavigate();
   const { data: posts, isLoading } = useUserPosts();
   const deletePost = useDeletePost();
   const [activeTab, setActiveTab] = useState<"approved" | "pending">(
@@ -28,7 +33,7 @@ const ProfilePage: React.FC = () => {
   }
 
   const filteredPosts =
-    posts?.filter((post) => post.status === activeTab) || [];
+    posts?.filter((post: Post) => post.status === activeTab) || [];
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -73,7 +78,7 @@ const ProfilePage: React.FC = () => {
           </button>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          {filteredPosts.map((post) => (
+          {filteredPosts.map((post: Post) => (
             <div key={post.id} className="relative group">
               <img
                 src={post.file_url || "/placeholder.svg"}

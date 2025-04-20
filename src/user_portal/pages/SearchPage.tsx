@@ -1,12 +1,15 @@
 import type React from "react";
 import { useState, type FormEvent } from "react";
 import { Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useSearchPosts } from "../../api/hooks/usePosts";
 import Post from "../components/Post";
 
+interface PostData {
+  id: string;
+  [key: string]: any;
+}
+
 const SearchPage: React.FC = () => {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const { data: searchResults, isLoading } = useSearchPosts(searchQuery);
 
@@ -34,7 +37,7 @@ const SearchPage: React.FC = () => {
         <div className="text-center text-gray-400">Searching...</div>
       ) : searchResults && searchResults.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {searchResults.map((post) => (
+          {searchResults.map((post: PostData) => (
             <Post key={post.id} {...post} />
           ))}
         </div>

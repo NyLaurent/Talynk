@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
 import axios from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,7 +13,7 @@ interface Post {
   description: string;
   video_url: string;
   fullUrl: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   user_id: string;
   approver_id: null | string;
   admin_id: null | string;
@@ -50,21 +50,10 @@ interface Media {
   isLiked: boolean;
 }
 
-interface LikeResponse {
-  success: boolean;
-  data: {
-    post: {
-      id: string;
-      likes: number;
-    };
-    isLiked: boolean;
-  };
-}
-
 const isVideoFile = (url: string): boolean => {
-  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi'];
+  const videoExtensions = [".mp4", ".webm", ".ogg", ".mov", ".avi"];
   const lowercaseUrl = url?.toLowerCase();
-  return videoExtensions.some(ext => lowercaseUrl?.endsWith(ext));
+  return videoExtensions.some((ext) => lowercaseUrl?.endsWith(ext));
 };
 
 const HomePage: React.FC = () => {
@@ -115,14 +104,14 @@ const HomePage: React.FC = () => {
     mutationFn: (postId: string) => postService.likePost(postId),
     onSuccess: (response) => {
       // Update the specific post in the cache
-      queryClient.setQueryData(['posts'], (oldData: any) => {
+      queryClient.setQueryData(["posts"], (oldData: any) => {
         if (!oldData) return oldData;
         return oldData.map((post: Post) => {
           if (post.id === response.data.post.id) {
             return {
               ...post,
               likes: response.data.post.likes,
-              isLiked: response.data.isLiked
+              isLiked: response.data.isLiked,
             };
           }
           return post;
@@ -178,24 +167,25 @@ const HomePage: React.FC = () => {
 
   // Transform posts to match the Media interface
   console.log("Posts array----------->:", posts);
-  const postData = posts.data
-  const mediaItems: Media[] = Array.isArray(postData) 
+  const postData = posts.data;
+  const mediaItems: Media[] = Array.isArray(postData)
     ? postData.map((post: Post) => {
         // Construct the full URL for the media
         let url = post.fullUrl;
         if (!url && post.video_url) {
           // If we have a video_url but no fullUrl, construct it
-          const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+          const baseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
           url = `${baseUrl}${post.video_url}`;
         }
-        
+
         // Check if the current user has liked this post
         const isLiked = post.PostLikes?.length > 0;
-        
+
         // Log the constructed URL for debugging
-        console.log('Media URL:', url);
-        console.log('Username-------> '+ post?.user?.username);
-        
+        console.log("Media URL:", url);
+        console.log("Username-------> " + post?.user?.username);
+
         return {
           id: post.id,
           user: {
@@ -209,11 +199,11 @@ const HomePage: React.FC = () => {
           likes: post.likes?.toString() || "0",
           comments: "0",
           shares: post.shares?.toString() || "0",
-          isLiked
+          isLiked,
         };
       })
     : [];
-    console.log(mediaItems)
+  console.log(mediaItems);
 
   if (!mediaItems.length) {
     return (
@@ -223,7 +213,7 @@ const HomePage: React.FC = () => {
     );
   }
 
-  const handleLikeClick = async (postId: string, isLiked: boolean) => {
+  const handleLikeClick = async (postId: string, currentlyLiked: boolean) => {
     try {
       await likeMutation.mutateAsync(postId);
     } catch (error) {
@@ -251,7 +241,10 @@ const HomePage: React.FC = () => {
   return (
     <div className="h-full snap-y snap-mandatory overflow-y-scroll bg-black">
       {mediaItems.map((media) => (
-        <div key={media.id} className="h-full snap-start relative flex justify-center items-center">
+        <div
+          key={media.id}
+          className="h-full snap-start relative flex justify-center items-center"
+        >
           {/* Main content container with video and info */}
           <div className="relative w-[calc(100vh*9/16)] h-full max-w-[500px] bg-black">
             {media.isVideo ? (
@@ -274,7 +267,7 @@ const HomePage: React.FC = () => {
                 crossOrigin="anonymous"
                 onError={(e) => {
                   // console.error('Error loading image:', media.url);
-                  e.currentTarget.src = '/placeholder.svg';
+                  e.currentTarget.src = "/placeholder.svg";
                 }}
               />
             )}
@@ -325,32 +318,42 @@ const HomePage: React.FC = () => {
           {/* Action buttons - Positioned closer to the video */}
           <div className="absolute right-2 h-[60%] flex flex-col items-center justify-end space-y-3 bottom-20">
             <div className="flex flex-col items-center">
-              <button 
-                className={`group p-1 text-white hover:text-pink-500 transition-colors ${media.isLiked ? 'text-pink-500' : ''}`}
+              <button
+                className={`group p-1 text-white hover:text-pink-500 transition-colors ${
+                  media.isLiked ? "text-pink-500" : ""
+                }`}
                 onClick={() => handleLikeClick(media.id, media.isLiked)}
                 disabled={likeMutation.isPending || unlikeMutation.isPending}
               >
                 <div className="bg-black bg-opacity-50 rounded-full p-2 group-hover:bg-opacity-70">
-                  <Heart className={`h-6 w-6 ${media.isLiked ? 'fill-current' : ''}`} />
+                  <Heart
+                    className={`h-6 w-6 ${media.isLiked ? "fill-current" : ""}`}
+                  />
                 </div>
-                <span className="text-xs font-semibold mt-1">{media.likes}</span>
+                <span className="text-xs font-semibold mt-1">
+                  {media.likes}
+                </span>
               </button>
             </div>
 
             <div className="flex flex-col items-center">
-              <button 
+              <button
                 className="group p-1 text-white hover:text-pink-500 transition-colors"
-                onClick={() => setSelectedPost(selectedPost === media.id ? null : media.id)}
+                onClick={() =>
+                  setSelectedPost(selectedPost === media.id ? null : media.id)
+                }
               >
                 <div className="bg-black bg-opacity-50 rounded-full p-2 group-hover:bg-opacity-70">
                   <MessageCircle className="h-6 w-6" />
                 </div>
-                <span className="text-xs font-semibold mt-1">{media.comments}</span>
+                <span className="text-xs font-semibold mt-1">
+                  {media.comments}
+                </span>
               </button>
             </div>
 
             <div className="flex flex-col items-center">
-              <button 
+              <button
                 className="group p-1 text-white hover:text-pink-500 transition-colors"
                 onClick={() => handleShareClick(media.id)}
                 disabled={shareMutation.isPending}
@@ -358,7 +361,9 @@ const HomePage: React.FC = () => {
                 <div className="bg-black bg-opacity-50 rounded-full p-2 group-hover:bg-opacity-70">
                   <Share2 className="h-6 w-6" />
                 </div>
-                <span className="text-xs font-semibold mt-1">{media.shares}</span>
+                <span className="text-xs font-semibold mt-1">
+                  {media.shares}
+                </span>
               </button>
             </div>
 

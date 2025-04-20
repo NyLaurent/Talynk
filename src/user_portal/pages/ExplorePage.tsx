@@ -2,11 +2,9 @@ import type React from "react";
 import { useState } from "react";
 import { Search } from "lucide-react";
 import Post from "../components/Post";
-import { useNavigate } from "react-router-dom";
 import { useAllPosts } from "../../api/hooks/usePosts";
 
 const ExplorePage: React.FC = () => {
-  const navigate = useNavigate();
   const { data: posts, isLoading, error } = useAllPosts();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -42,7 +40,7 @@ const ExplorePage: React.FC = () => {
 
       {/* Grid of Posts */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-        {posts?.map((post) => (
+        {posts?.map((post: any) => (
           <Post key={post.id} {...post} />
         ))}
       </div>
